@@ -550,6 +550,7 @@ view_status_2: true
 view_bottom: false
 button_left: false
 vibration_duration: 5
+silent: false
 ```
 
 ```yaml
@@ -647,6 +648,7 @@ view_status_2: true
 view_bottom: false
 button_left: false
 beep: sensor.vistabeeps
+silent: false
 ```
 ![image](https://github.com/user-attachments/assets/7bd575bf-d5ab-4cb3-ae5b-ac15ffb9f7de)
 

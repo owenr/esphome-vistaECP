@@ -1,4 +1,4 @@
-console.info("%c  ALARM-KEYPAD-CARD %c v0.4.1 ", "color: orange; font-weight: bold; background: black", "color: white; font-weight: bold; background: dimgray");
+console.info("%c  ALARM-KEYPAD-CARD %c v0.4.1a ", "color: orange; font-weight: bold; background: black", "color: white; font-weight: bold; background: dimgray");
 
 import {
   LitElement,
@@ -422,6 +422,7 @@ class AlarmKeypadCard extends LitElement {
     this._text_pound = (config.text_pound != null) ? config.text_pound : "";
 
     this._vibrate = (config.vibration_duration != null) ? config.vibration_duration : 5;
+    this._silent = (config.silent != null) ? config.silent : false;
 
        this._style = config.style != null ? config.style : "";
        for (let i in this._style) {
@@ -479,17 +480,36 @@ class AlarmKeypadCard extends LitElement {
     this._line2 = state2;
   }
 
+  haptic(detail) {
+    window.dispatchEvent(new CustomEvent('haptic', {
+      detail: detail,
+      bubbles: true,
+      composed: true,
+    }));
+  }
+
   beepChanged() {
     if (this._kpdbeep.state == "0" || this._kpdbeep.state == null) {
-      var promise = this.shadowRoot.getElementById("exitsound1").pause();
-      this.shadowRoot.getElementById("exitsound2").pause();
-      this.shadowRoot.getElementById("chime").pause();
-    } else if (this._kpdbeep.state == "1") {
-      var promise = this.shadowRoot.getElementById("exitsound1").play();
+        this.shadowRoot.getElementById("exitsound1").pause();
+        this.shadowRoot.getElementById("exitsound2").pause();
+        this.shadowRoot.getElementById("chime").pause();
+        return;
+    }
+    if (this._kpdbeep.state == "1") {
+      if(!this._silent) {
+        var promise = this.shadowRoot.getElementById("exitsound1").play();
+      }
+      this.haptic('light');
     } else if (this._kpdbeep.state == "2") {
-      var promise = this.shadowRoot.getElementById("exitsound2").play();
+      if(!this._silent) {
+        var promise = this.shadowRoot.getElementById("exitsound2").play();
+      }
+      this.haptic('medium');
     } else if (this._kpdbeep.state > 2) {
-      var promise = this.shadowRoot.getElementById("chime").play();
+      if(!this._silent) {
+        var promise = this.shadowRoot.getElementById("chime").play();
+      }
+      this.haptic('heavy');
     }
 
     if (promise !== undefined) {
@@ -545,6 +565,7 @@ class AlarmKeypadCard extends LitElement {
     if ('vibrate' in navigator) {
       navigator.vibrate(this._vibrate);
     }
+    this.haptic('selection');
     this._hass.callService(this._kpdservicetype, this._kpdservice, key);
 
   }
